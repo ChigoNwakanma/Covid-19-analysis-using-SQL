@@ -1,104 +1,111 @@
+--COVID-19 EXPLORATORY ANALYSIS
+--The COVID-19 dataset spreadsheet was split and saved as 2 different sheets; covid_deaths & covid_vax
+
+--Checking to see that all the columns were uploaded correctly
 SELECT * 
- FROM `portfolio1-337505.covid_data.covid_deaths`
- ORDER BY 3, 4
+FROM `portfolio1-337505.covid_data.covid_deaths`
+ORDER BY 3, 4
 
- --select data that we are going to be using
+--Pulling the main columns that will be used for analysis
+SELECT 
+  Location, date, total_cases, new_cases, total_deaths, population
+FROM `portfolio1-337505.covid_data.covid_deaths`
+ORDER BY 1, 2
 
- SELECT Location, date, total_cases, new_cases, total_deaths, population
- FROM `portfolio1-337505.covid_data.covid_deaths`
- ORDER BY 1, 2
+--Exploring the likelihood of dying if you contract COVID in a specific country
+--Looking at Total cases vs total deaths
+SELECT 
+  Location, date, total_cases, total_deaths, (total_deaths/total_cases)*100 AS Death_percentage
+FROM `portfolio1-337505.covid_data.covid_deaths`
+WHERE location = "Canada" 
+AND ((total_deaths/total_cases)*100) > 2.0 AND date BETWEEN '2021-01-01' and '2022-01-01' --this line adds more filters by date and death %
+ORDER BY 1, 2
 
- --Looking at Total cases vs total deaths
- --Shows the likelihood of dying if you contract COVID in your country
-
- SELECT Location, date, total_cases, total_deaths, (total_deaths/total_cases)*100 AS Death_percentage
- FROM `portfolio1-337505.covid_data.covid_deaths`
- WHERE location = "Canada" AND ((total_deaths/total_cases)*100) > 2.7 AND date BETWEEN '2021-01-01' and '2022-01-01'
- ORDER BY 1, 2
-
- --Looking at the Total cases vs the population for CANADA
- --shows what %age of population got COVID
-
-SELECT Location, date, total_cases, population, (total_cases/population)*100 AS Case_percentage
- FROM `portfolio1-337505.covid_data.covid_deaths`
- WHERE location = "Canada" 
- ORDER BY 1, 2
+--Looking at the Total cases vs the population for CANADA
+--this shows what %age of population got COVID as the days progress
+SELECT 
+  Location, date, total_cases, population, (total_cases/population)*100 AS Case_percentage
+FROM `portfolio1-337505.covid_data.covid_deaths`
+WHERE location = "Canada" 
+ORDER BY 1, 2
 
 --Looking at countries with highest infection rates compared to population
+SELECT 
+  Location, population, MAX(total_cases) AS Highest_infection_count, MAX((total_cases/population))*100 AS Percent_population_infected
+FROM `portfolio1-337505.covid_data.covid_deaths`
+GROUP BY 1, 2
+ORDER BY Percent_population_infected desc 
 
-SELECT Location, population, MAX(total_cases) AS Highest_infection_count, MAX((total_cases/population))*100 AS Percent_population_infected
- FROM `portfolio1-337505.covid_data.covid_deaths`
- GROUP BY 1, 2
- ORDER BY Percent_population_infected desc 
+--Showing the countries with the highest mortality rates, grouped by location
+SELECT
+  Location, MAX(total_deaths) AS Highest_death_count, MAX((total_deaths/population))*100 AS Percent_mortality
+FROM `portfolio1-337505.covid_data.covid_deaths`
+WHERE continent IS NOT NULL --eliminates rows in the LOCATION column that contain Continents
+GROUP BY 1         
+ORDER BY Highest_death_count desc
 
- --Showing the countries with the highest death count per population
- 
-SELECT Location, MAX(total_deaths) AS Highest_death_count, MAX((total_deaths/population))*100 AS Percent_mortality
- FROM `portfolio1-337505.covid_data.covid_deaths`
- --The Where clause will eliminate rows in the LOCATION column that contain Continents
- WHERE continent IS NOT NULL
- GROUP BY 1         
- ORDER BY Highest_death_count desc
-
- --Now grouping death counts by continents
-
-SELECT continent, MAX(total_deaths) AS Highest_death_count, MAX((total_deaths/population))*100 AS Percent_mortality
- FROM `portfolio1-337505.covid_data.covid_deaths`
- WHERE continent IS NOT NULL
- GROUP BY 1         
- ORDER BY Percent_mortality desc
+--Grouping death counts by continents
+SELECT
+  continent, MAX(total_deaths) AS Highest_death_count, MAX((total_deaths/population))*100 AS Percent_mortality
+FROM `portfolio1-337505.covid_data.covid_deaths`
+WHERE continent IS NOT NULL
+GROUP BY 1         
+ORDER BY Percent_mortality desc
 
 --Now going back to the infection counts to compare by continent
-
- SELECT continent, MAX(total_cases) AS Highest_infection_count, MAX((total_cases/population))*100 AS Percent_population_infected
- FROM `portfolio1-337505.covid_data.covid_deaths`
- WHERE continent IS NOT NULL
- GROUP BY 1
- ORDER BY Percent_population_infected desc
+ SELECT
+   continent, MAX(total_cases) AS Highest_infection_count, MAX((total_cases/population))*100 AS Percent_population_infected
+FROM `portfolio1-337505.covid_data.covid_deaths`
+WHERE continent IS NOT NULL
+GROUP BY 1
+ORDER BY Percent_population_infected desc
 
  --INSIGHT: When looking at the death counts by continents, Africa ranks 5th, which makes sense cos the infection count ranks 5th as well
- --(contd)...but when we compare the death and infection counts WRT population, things look a bit different. Ordering by "Percent_mortality" and "percent_population_infected" 
- --...will show that Africa ranks 2nd in infection rates by population and 6th(lowest) in Percent_mortality
+ --but when we compare the death and infection counts WRT population, things look a bit different. Ordering by "Percent_mortality" and "percent_population_infected" 
+ --will show that Africa ranks 2nd in infection rates by population and 6th(lowest) in Percent_mortality
 
 
 
---GLOBAL DEATH % ON EACH RECORDED DATE, EXCEPT DAYS WITH ZERO NEW CASES BECAUSE WE CAN'T DIVIDE BY ZERO
+--EXPLORING FROM A GLOBAL VIEWPOINT
+--Looking at Death % on each recorded date(excluding days with 0 cases to avoid division error)
 --we can observe that the death percentage rises gradually up until mid-april 2020, then begins to drop.
 --some outliers occur in feb 2020 with some dates having over 20% death %
 
-SELECT date, SUM(new_cases), SUM(new_deaths), (SUM(new_deaths)/SUM(new_cases)) *100 AS Deathpercentage
- --total_cases, total_deaths, (total_deaths/total_cases)*100 AS Death_percentage
- FROM `portfolio1-337505.covid_data.covid_deaths`
- WHERE location IS NOT NULL AND new_cases != 0
- GROUP BY date
- ORDER BY 1, 2
+SELECT 
+  date, SUM(new_cases) as TotalCases, SUM(new_deaths) as TotalDeaths, (SUM(new_deaths)/SUM(new_cases)) *100 AS Deathpercentage
+FROM `portfolio1-337505.covid_data.covid_deaths`
+WHERE location IS NOT NULL AND new_cases != 0
+GROUP BY date
+ORDER BY 1, 2
 
 
---Looking at the world total death % as at the last recorded date in the dataset...
+--Looking at the Global death percentage as of the last recorded date in the dataset
+SELECT 
+  SUM(new_cases) AS TotalCases, SUM(new_deaths) as TotalDeaths, (SUM(new_deaths)/SUM(new_cases)) *100 AS Deathpercentage
+FROM `portfolio1-337505.covid_data.covid_deaths`
+WHERE location IS NOT NULL AND new_cases != 0
+ORDER BY 1, 2
 
-SELECT SUM(new_cases) AS totalcases, SUM(new_deaths) as totaldeaths, (SUM(new_deaths)/SUM(new_cases)) *100 AS Deathpercentage
- FROM `portfolio1-337505.covid_data.covid_deaths`
- WHERE location IS NOT NULL AND new_cases != 0
- ORDER BY 1, 2
 
-
---NOW JOINING BOTH THE DEATHS AND VAX TABLES...
+--NOW JOINING BOTH THE DEATHS AND VAX TABLES TO SEE THE EFFECT OF THE VACCINATIONS
 
 SELECT *
- FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
- JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
-ON Deaths.location = Vax.Location 
-AND Deaths.date = Vax.date
+FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
+JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
+  ON Deaths.location = Vax.Location 
+  AND Deaths.date = Vax.date
 
---looking at total population vs vaccinations
-
-SELECT Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
- FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
- JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
-ON Deaths.location = Vax.Location 
-AND Deaths.date = Vax.date
+--looking at the daily no. of vaccinations for each location 
+SELECT
+  Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
+FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
+JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
+  ON Deaths.location = Vax.Location 
+  AND Deaths.date = Vax.date
 WHERE deaths.continent IS NOT NULL 
+AND Vax.location = "Canada"  --this line adds a filter by location(country)
 ORDER BY 2, 3 
+
 
 --NOW IF WE WANTED A ROLLING COUNT OF THE TOTAL NUMBER OF VACCINATIONS DONE, WE HAV ETO USE A "PARTITION" COMMAND
 --"PARTITION BY" CLAUSE is usually used in conjunction with an aggregate fn to create a new column which makes reference to/is derived from an existing column.
@@ -106,31 +113,33 @@ ORDER BY 2, 3
 --hence, each time a new location is reached in the order, the count begins from zero and begins to add up for that specific location
 --Check out the use of partition with the LEAD/LAG aggregate fns online. Quite Interesting!!!
 
-SELECT Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
+SELECT
+  Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
 SUM(Vax.new_vaccinations) OVER (PARTITION BY Deaths.location ORDER BY Deaths.location, Deaths.date) AS RollingCount_NewVax
- FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
- JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
-ON Deaths.location = Vax.Location 
-AND Deaths.date = Vax.date
+FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
+JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
+  ON Deaths.location = Vax.Location 
+  AND Deaths.date = Vax.date
 WHERE deaths.continent IS NOT NULL 
 ORDER BY 2, 3 
 
---Using the MAX fn with that rolling count, and comparing that to the total population, we can find how many people are vaccinated in each country as of the latest date recorded
-
-SELECT Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
-SUM(Vax.new_vaccinations) OVER (PARTITION BY Deaths.location ORDER BY Deaths.location, Deaths.date) AS RollingCount_NewVax,
-(RollingCount_NewVax/population)*100 AS TotalVaxcount  --this will give an error cos we can't call an alias column we created, using the SELECT fn.
- FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
- JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
-ON Deaths.location = Vax.Location 
-AND Deaths.date = Vax.date
+--Using the MAX fn with that rolling count, and comparing that to the total population, 
+--we can find how many people are vaccinated in each country as of the latest date recorded
+SELECT 
+  Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
+  SUM(Vax.new_vaccinations) OVER (PARTITION BY Deaths.location ORDER BY Deaths.location, Deaths.date) AS RollingCount_NewVax,
+  (RollingCount_NewVax/population)*100 AS TotalVaxcount  --this will give an error cos we can't call an alias column we created, using the SELECT fn.
+FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
+JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
+  ON Deaths.location = Vax.Location 
+  AND Deaths.date = Vax.date
 WHERE deaths.continent IS NOT NULL 
 ORDER BY 2, 3 
 
---to solve the above problem, we need to either create a temp table, using the CREATE and INSERT fns OR use a CTE (Common Table Expression), using WITH clause
+--to solve the above problem, we need to use a CTE (Common Table Expression), using WITH clause
 --few pointers: 
--- we could do this without the MAX aggregate, and just scroll to the bottom of each location group to see the rolling TotalVaxCount
--- but if we go with the MAX agg, remember to remove the date from the selected columns, as it will throw everything off
+--we could do this without the MAX aggregate, and just scroll to the bottom of each location group to see the rolling TotalVaxCount
+--but if we go with the MAX agg, remember to remove the date from the selected columns, as it will throw everything off
 --also, get rid of the ORDER BY clause at the end, Not needed
 
 --Now using the WITH clause to make a CTE;
@@ -138,12 +147,13 @@ ORDER BY 2, 3
 WITH TotalVaxCount 
 AS
  (
-    SELECT Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
-    SUM(Vax.new_vaccinations) OVER (PARTITION BY Deaths.location ORDER BY Deaths.location, Deaths.date) AS RollingCount_NewVax,
+    SELECT 
+      Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
+      SUM(Vax.new_vaccinations) OVER (PARTITION BY Deaths.location ORDER BY Deaths.location, Deaths.date) AS RollingCount_NewVax,
     FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
     JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
-    ON Deaths.location = Vax.Location 
-    AND Deaths.date = Vax.date
+      ON Deaths.location = Vax.Location 
+      AND Deaths.date = Vax.date
     WHERE deaths.continent IS NOT NULL 
 
 )
@@ -157,12 +167,13 @@ FROM TotalVaxcount
 -- This way, you can open it separately and query it, without affecting the main dataset.
 --e.g i've copied and pasted the chunk of code below into a new tab, then "save view"
 
-SELECT Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
-SUM(Vax.new_vaccinations) OVER (PARTITION BY Deaths.location ORDER BY Deaths.location, Deaths.date) AS RollingCount_NewVax
- FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
- JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
-ON Deaths.location = Vax.Location 
-AND Deaths.date = Vax.date
+SELECT 
+  Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
+  SUM(Vax.new_vaccinations) OVER (PARTITION BY Deaths.location ORDER BY Deaths.location, Deaths.date) AS RollingCount_NewVax
+FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
+JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
+  ON Deaths.location = Vax.Location 
+  AND Deaths.date = Vax.date
 WHERE deaths.continent IS NOT NULL 
 ORDER BY 2, 3 
 
