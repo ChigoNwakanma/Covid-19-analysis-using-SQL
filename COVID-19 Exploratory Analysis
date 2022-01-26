@@ -107,7 +107,7 @@ AND Vax.location = "Canada"  --this line adds a filter by location(country)
 ORDER BY 2, 3 
 
 
---NOW IF WE WANTED A ROLLING COUNT OF THE TOTAL NUMBER OF VACCINATIONS DONE, WE HAV ETO USE A "PARTITION" COMMAND
+--NOW IF WE WANTED A ROLLING COUNT OF THE TOTAL NUMBER OF VACCINATIONS DONE, WE HAVE TO USE A "PARTITION" COMMAND
 --"PARTITION BY" CLAUSE is usually used in conjunction with an aggregate fn to create a new column which makes reference to/is derived from an existing column.
 --so below, we have been able to create a new column  "RollingCount_NewVax", which contains the sum of the previous "Vax.new_vaccinations" rows, GIVEN they belong in the same "location"
 --hence, each time a new location is reached in the order, the count begins from zero and begins to add up for that specific location
