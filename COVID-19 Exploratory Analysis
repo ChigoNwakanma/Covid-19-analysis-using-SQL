@@ -1,4 +1,4 @@
---COVID-19 EXPLORATORY ANALYSIS
+aus--COVID-19 EXPLORATORY ANALYSIS
 --The COVID-19 dataset spreadsheet was split and saved as 2 different sheets; covid_deaths & covid_vax
 
 --Checking to see that all the columns were uploaded correctly
@@ -60,7 +60,7 @@ WHERE continent IS NOT NULL
 GROUP BY 1
 ORDER BY Percent_population_infected desc
 
- --INSIGHT: When looking at the death counts by continents, Africa ranks 5th, which makes sense cos the infection count ranks 5th as well
+ --INSIGHT: When looking at the death counts by continents, Africa ranks 5th, which makes sense because the infection count ranks 5th as well
  --but when we compare the death and infection counts WRT population, things look a bit different. Ordering by "Percent_mortality" and "percent_population_infected" 
  --will show that Africa ranks 2nd in infection rates by population and 6th(lowest) in Percent_mortality
 
@@ -128,7 +128,7 @@ ORDER BY 2, 3
 SELECT 
   Deaths.continent, Deaths.location, Deaths.date, Deaths.population, Vax.new_vaccinations, 
   SUM(Vax.new_vaccinations) OVER (PARTITION BY Deaths.location ORDER BY Deaths.location, Deaths.date) AS RollingCount_NewVax,
-  (RollingCount_NewVax/population)*100 AS TotalVaxcount  --this will give an error cos we can't call an alias column we created, using the SELECT fn.
+  (RollingCount_NewVax/population)*100 AS TotalVaxcount  --this will give an error because we can't call an alias column we created, using the SELECT fn.
 FROM `portfolio1-337505.covid_data.covid_deaths` AS Deaths
 JOIN `portfolio1-337505.covid_data.covid_vax` AS Vax
   ON Deaths.location = Vax.Location 
