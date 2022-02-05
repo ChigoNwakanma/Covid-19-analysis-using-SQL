@@ -1,4 +1,4 @@
-aus--COVID-19 EXPLORATORY ANALYSIS
+--COVID-19 EXPLORATORY ANALYSIS
 --The COVID-19 dataset spreadsheet was split and saved as 2 different sheets; covid_deaths & covid_vax
 
 --Checking to see that all the columns were uploaded correctly
@@ -196,7 +196,7 @@ Select * from `portfolio1-337505.covid_data.RollingCount_sample`
 
 Select * from `portfolio1-337505.covid_data.Percent_population_vaccinated`
 
---Knowing this now, you can create different views based on different parts of your query and use those for viz purposes.
+--Knowing this now, you can create different views based on different parts of your query and use those for visualization purposes.
 
 
 
