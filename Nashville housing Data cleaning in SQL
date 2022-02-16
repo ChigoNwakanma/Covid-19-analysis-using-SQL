@@ -5,7 +5,6 @@
 
 */
 
-
 -- Preview the uploaded data set
 SELECT * 
 FROM `portfolio1-337505.Nashville_housing.V5`
