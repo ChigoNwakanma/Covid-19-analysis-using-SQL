@@ -204,7 +204,7 @@ Select * from `portfolio1-337505.covid_data.RollingCount_sample`
 
 Select * from `portfolio1-337505.covid_data.Percent_population_vaccinated`
 
--- Knowing this now, you can create different views based on different parts of your query and use those for visualization purposes.
+-- Knowing this now, you can create different views based on different parts of your query and use those for visualization purposes. 
 
 
 
