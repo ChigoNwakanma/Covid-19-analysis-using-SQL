@@ -6,6 +6,8 @@ Skills used: Joins, CTE's, Windows Functions, Aggregate Functions, Creating View
 
 The original data spreadsheet was split and saved as 2 different sheets; covid_deaths & covid_vax
 
+Source: https://ourworldindata.org/covid-deaths
+
 */
 
 
