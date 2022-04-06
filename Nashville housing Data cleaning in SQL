@@ -29,7 +29,7 @@ ORDER BY ParcelID --this will show that there are duplicate entries, which could
 
 -- using a self-join to identify the addresses with duplicates
 SELECT 
-  selfjoinA.ParcelID,selfjoinA.PropertyAddress, selfjoinB.ParcelID, selfjoinB.PropertyAddress,
+  selfjoinA.ParcelID, selfjoinA.PropertyAddress, selfjoinB.ParcelID, selfjoinB.PropertyAddress,
   IFNULL(selfjoinA.PropertyAddress, selfjoinB.PropertyAddress) --IFNULL() function lets you return an alternative value if an expression is NULL
 FROM `portfolio1-337505.Nashville_housing.V5` AS selfjoinA
 JOIN `portfolio1-337505.Nashville_housing.V5` AS selfjoinB
